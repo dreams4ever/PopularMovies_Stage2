@@ -22,5 +22,8 @@
     <string name="trailer_name">Trailer_name</string>
     <string name="Favorite">Favorite</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 
 </resources>

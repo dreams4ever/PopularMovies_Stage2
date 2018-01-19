@@ -1,8 +1,12 @@
 package com.example.dreams.popularmovies_stage2.activity;
 
+import android.app.Fragment;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -14,10 +18,10 @@ import com.example.dreams.popularmovies_stage2.provider.Contract;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FavoriteActivity extends AppCompatActivity {
+public class FavoriteFragment extends Fragment {
 
     GridView mFavoriteGrid;
-MoviesPosterAdapter mFavoriteAdapter;
+    MoviesPosterAdapter mFavoriteAdapter;
     List<MovieModel> mFavoriteList;
     TextView mViewSort;
 
@@ -36,26 +40,29 @@ MoviesPosterAdapter mFavoriteAdapter;
     };
 
     public Cursor getMoviesFav() {
-        return getContentResolver().query(Contract.MovieEntry.CONTENT_URI,
+        return getActivity().getContentResolver().query(Contract.MovieEntry.CONTENT_URI,
                 MOVIE_COLUMNS, Contract.MovieEntry.COLUMN_FAV + " = ?",
-                new String[]{String.valueOf(1)},null);
+                new String[]{String.valueOf(1)}, null);
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         //Define Grid View
-        mFavoriteGrid=  findViewById(R.id.filmsGridView);
+        mFavoriteGrid = view.findViewById(R.id.filmsGridView);
         //Init and Attach Adapter
-        mFavoriteAdapter = new MoviesPosterAdapter(this);
-        mViewSort = findViewById(R.id.ViewSort);
+        mFavoriteAdapter = new MoviesPosterAdapter(getActivity(), getFragmentManager(), false);
+        mViewSort = view.findViewById(R.id.ViewSort);
+    }
 
-
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.activity_main, container, false);
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
 
         Cursor moviesCursor = getMoviesFav();

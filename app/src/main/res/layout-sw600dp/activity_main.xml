@@ -1,40 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
-<TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="@string/most_popular"
-    android:textSize="50sp"
-    android:textColor="#fff"
-    android:layout_gravity="center"
-    android:textStyle="bold"
-    android:layout_marginTop="20dp"
-    android:layout_marginBottom="20dp"
-    />
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 
-    <me.crosswall.lib.coverflow.core.PagerContainer
-        android:id="@+id/pager_container"
-        android:layout_width="match_parent"
-        android:layout_height="500dp">
+    <fragment
+        android:name="com.example.dreams.popularmovies_stage2.MainFragment"
+        android:id="@+id/image_fragment"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="match_parent">
+    </fragment>
 
-        <android.support.v4.view.ViewPager
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
-
-    </me.crosswall.lib.coverflow.core.PagerContainer>
-
-    <android.support.v4.view.ViewPager
-        android:id="@+id/pager"
-        android:layout_gravity="center"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:velocity="150"/>
-
-
+    <fragment
+        android:name="com.example.dreams.popularmovies_stage2.FilmDetailsFragment"
+        android:id="@+id/details_fragment"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="match_parent">
+    </fragment>
 </LinearLayout>

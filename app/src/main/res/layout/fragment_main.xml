@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
+    android:background="@color/colorPrimary"
+    android:orientation="vertical">
+
     <TextView
         android:id="@+id/ViewSort"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/most_popular"
-        android:textSize="22sp"
-        android:textColor="#fff"
         android:layout_gravity="center"
-        android:textStyle="bold"
-        android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
-        />
+        android:layout_marginTop="20dp"
+        android:text="@string/most_popular"
+        android:textColor="#fff"
+        android:textSize="22sp"
+        android:textStyle="bold" />
 
     <GridView
         android:id="@+id/filmsGridView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:verticalSpacing="1dp"
-        android:horizontalSpacing="1dp"
-        android:numColumns="3"
+        android:drawSelectorOnTop="true"
+        android:horizontalSpacing="3dp"
+        android:numColumns="auto_fit"
         android:padding="3dp"
-        android:drawSelectorOnTop="true" />
+        android:verticalSpacing="3dp" />
 
 
 </LinearLayout>

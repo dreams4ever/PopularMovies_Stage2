@@ -25,7 +25,7 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         </activity>
-        <activity android:name=".activity.FavoriteActivity">
+        <activity android:name=".activity.FavoriteFragment">
 
         </activity>
         <provider

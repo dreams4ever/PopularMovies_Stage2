@@ -1,7 +1,7 @@
 package com.example.dreams.popularmovies_stage2.activity;
 
 
-import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -14,21 +14,22 @@ import com.example.dreams.popularmovies_stage2.R;
 import com.example.dreams.popularmovies_stage2.adapters.MoviesPosterAdapter;
 import com.example.dreams.popularmovies_stage2.models.MovieModel;
 import com.example.dreams.popularmovies_stage2.models.MovieResponse;
+import com.example.dreams.popularmovies_stage2.provider.Contract;
 import com.example.dreams.popularmovies_stage2.provider.CoreInteractor;
 import com.example.dreams.popularmovies_stage2.service.ApiService;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindBool;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -37,13 +38,38 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     MoviesPosterAdapter mMoviesAdapter;
-    MoviesPosterAdapter mDesMoviesAdapter;
     TextView mViewSort;
     Retrofit mRetrofit;
     ApiService mService;
+    @BindView(R.id.filmsGridView)
     GridView mGridView;
+    @BindBool(R.bool.two_pane_mode)
+    boolean isTwoPane;
     int mLastPositionX = 0;
     int mLastPositionY = 0;
+    Call<MovieResponse> desMovieCall;
+    Call<MovieResponse> highMovieCall;
+    List<MovieModel> mFavoriteList;
+
+    static final int COL_MOVIE_UID = 1;
+    static final int COL_MOVIE_TITLE = 3;
+    static final int COL_MOVIE_IMAGE = 4;
+
+
+    private static final String[] MOVIE_COLUMNS = {
+            Contract.MovieEntry.TABLE_NAME + "." + Contract.MovieEntry._ID,
+            Contract.MovieEntry.COLUMN_ID,
+            Contract.MovieEntry.COLUMN_FAV,
+            Contract.MovieEntry.COLUMN_TITLE,
+            Contract.MovieEntry.COLUMN_IMAGE_PATH,
+
+    };
+
+    public Cursor getMoviesFav() {
+        return getContentResolver().query(Contract.MovieEntry.CONTENT_URI,
+                MOVIE_COLUMNS, Contract.MovieEntry.COLUMN_FAV + " = ?",
+                new String[]{String.valueOf(1)}, null);
+    }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -73,14 +99,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         mViewSort = findViewById(R.id.ViewSort);
-
-        mMoviesAdapter = new MoviesPosterAdapter(this);
-        mDesMoviesAdapter = new MoviesPosterAdapter(this);
-
-        mGridView = findViewById(R.id.filmsGridView);
-
+        mMoviesAdapter = new MoviesPosterAdapter(this, getFragmentManager(), isTwoPane);
 
         mRetrofit = new Retrofit.Builder()
                 .baseUrl("https://api.themoviedb.org/3/movie/")
@@ -88,15 +110,10 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         mService = mRetrofit.create(ApiService.class);
-
-
-        Call<MovieResponse> highMovieCall = mService.voteListMovies();
-        highMovieCall.enqueue(new highVoteCallback());
-
-        Call<MovieResponse> desMovieCall = mService.mostListMovies();
-        desMovieCall.enqueue(new desCallback());
-
-        mGridView.setAdapter(mDesMoviesAdapter);
+        desMovieCall = mService.mostListMovies();
+        highMovieCall = mService.voteListMovies();
+        desMovieCall.enqueue(new highVoteCallback());
+        mGridView.setAdapter(mMoviesAdapter);
 
     }
 
@@ -115,19 +132,35 @@ public class MainActivity extends AppCompatActivity {
             case R.id.itemVote:
                 choosenList = 1;
                 mViewSort.setText(R.string.high_rated);
-                mGridView.setAdapter(mMoviesAdapter);
+                highMovieCall.clone().enqueue(new highVoteCallback());
                 break;
 
             case R.id.itemPopDec:
                 choosenList = 0;
                 mViewSort.setText(R.string.most_popular);
-                mGridView.setAdapter(mDesMoviesAdapter);
+                desMovieCall.clone().enqueue(new desCallback());
                 break;
 
             case R.id.itemFavorite:
-//                mViewSort.setText(R.string.Favorite);
-                Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
-                startActivity(intent);
+                mViewSort.setText(R.string.Favorite);
+                Cursor moviesCursor = getMoviesFav();
+
+                if (moviesCursor.getCount() != 0)
+                    mFavoriteList = new ArrayList<>();
+                while (moviesCursor.moveToNext()) {
+                    MovieModel movieModel = new MovieModel();
+                    movieModel.setOriginalTitle(moviesCursor.getString(COL_MOVIE_TITLE));
+                    movieModel.setPosterPath(moviesCursor.getString(COL_MOVIE_IMAGE));
+                    movieModel.setId(moviesCursor.getInt(COL_MOVIE_UID));
+
+                    movieModel.setAdult(false);
+
+                    mFavoriteList.add(movieModel);
+                    mViewSort.setText(R.string.Favorite);
+
+                }
+                mMoviesAdapter.setData(mFavoriteList);
+                mMoviesAdapter.notifyDataSetChanged();
                 break;
             case R.id.itemRefresh:
                 mRetrofit = new Retrofit.Builder()
@@ -137,16 +170,13 @@ public class MainActivity extends AppCompatActivity {
 
                 mService = mRetrofit.create(ApiService.class);
 
-
-                Call<MovieResponse> highMovieCall = mService.voteListMovies();
-                highMovieCall.enqueue(new highVoteCallback());
-
-                Call<MovieResponse> desMovieCall = mService.mostListMovies();
-                desMovieCall.enqueue(new desCallback());
-
-                if (choosenList == 0)
-                    mGridView.setAdapter(mDesMoviesAdapter);
-                else mGridView.setAdapter(mMoviesAdapter);
+                if (choosenList == 0) {
+                    mViewSort.setText(R.string.most_popular);
+                    desMovieCall.clone().enqueue(new desCallback());
+                } else {
+                    mViewSort.setText(R.string.high_rated);
+                    highMovieCall.clone().enqueue(new highVoteCallback());
+                }
 
                 break;
 
@@ -165,7 +195,8 @@ public class MainActivity extends AppCompatActivity {
                 mMoviesAdapter.setData(response.body().getResults());
                 mMoviesAdapter.notifyDataSetChanged();
                 Gson gson = new Gson();
-                Type type = new TypeToken<List<MovieModel>>() {}.getType();
+                Type type = new TypeToken<List<MovieModel>>() {
+                }.getType();
                 String json = gson.toJson(response.body().getResults(), type);
                 CoreInteractor interactor = new CoreInteractor(MainActivity.this);
                 try {
@@ -190,10 +221,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
             if (response != null) {
-                mDesMoviesAdapter.setData(response.body().getResults());
-                mDesMoviesAdapter.notifyDataSetChanged();
+                mMoviesAdapter.setData(response.body().getResults());
+                mMoviesAdapter.notifyDataSetChanged();
                 Gson gson = new Gson();
-                Type type = new TypeToken<List<MovieModel>>() {}.getType();
+                Type type = new TypeToken<List<MovieModel>>() {
+                }.getType();
                 String json = gson.toJson(response.body().getResults(), type);
                 CoreInteractor interactor = new CoreInteractor(MainActivity.this);
                 try {
