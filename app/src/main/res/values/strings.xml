@@ -24,6 +24,10 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="choose_movie_first">Choose Movie First</string>
+    <string name="per_ten">/10</string>
+    <string name="for_adults_only">for adult only</string>
+    <string name="for_all">for all</string>
 
 
 </resources>

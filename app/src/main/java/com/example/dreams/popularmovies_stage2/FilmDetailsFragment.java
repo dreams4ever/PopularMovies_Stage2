@@ -44,6 +44,10 @@ public class FilmDetailsFragment extends Fragment implements LoaderManager.Loade
     int mId;
     @BindView(R.id.film_adult)
     TextView mFilm_adult;
+    @BindView(R.id.trailers)
+    TextView trailers;
+    @BindView(R.id.Reviews)
+    TextView Reviews;
     @BindView(R.id.film_rate)
     TextView mFilm_Rate;
     @BindView(R.id.film_overview)
@@ -133,6 +137,8 @@ public class FilmDetailsFragment extends Fragment implements LoaderManager.Loade
 
             mTrailers.setAdapter(mTrailersAdapter);
 
+            trailers.setVisibility(View.VISIBLE);
+            Reviews.setVisibility(View.VISIBLE);
 
             ApiService ReviewsService = mRetrofit.create(ApiService.class);
             final Call<ReviewsResult> ReviewsMovieCall = ReviewsService.reviews(mId);
@@ -159,6 +165,10 @@ public class FilmDetailsFragment extends Fragment implements LoaderManager.Loade
 
                 }
             });
+        } else {
+            trailers.setVisibility(View.GONE);
+            Reviews.setVisibility(View.GONE);
+            mFilm_Overview.setText(R.string.choose_movie_first);
         }
     }
 
@@ -196,7 +206,7 @@ public class FilmDetailsFragment extends Fragment implements LoaderManager.Loade
 
         @Override
         public void onResponse(Call<MovieModel> call, Response<MovieModel> response) {
-            if (response != null) {
+            if (response.body() != null) {
 
 //                mModel = mRealm.where(MovieModel.class).equalTo("id", response.body()
 //                        .getId()).findFirst();
@@ -207,21 +217,22 @@ public class FilmDetailsFragment extends Fragment implements LoaderManager.Loade
 //                    mModel = response.body();
 //                }
 
+
                 String title = response.body().getOriginalTitle();
                 String date = response.body().getReleaseDate();
                 mFilm_Date.setText(date);
                 Boolean adult = response.body().getAdult();
 
                 if (adult == true)
-                    mFilm_adult.setText("for adult only");
+                    mFilm_adult.setText(R.string.for_adults_only);
                 else
-                    mFilm_adult.setText("for all");
+                    mFilm_adult.setText(R.string.for_all);
 
                 String overview = response.body().getOverview();
                 mFilm_Overview.setText(overview);
 
                 String rate = response.body().getRate();
-                mFilm_Rate.setText(rate + " /10");
+                mFilm_Rate.setText(String.format("%s%s", rate, getString(R.string.per_ten)));
 
                 Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w500" + response.body().getPosterPath()).into(mFilm_Poster);
 
