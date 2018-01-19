@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+    <string name="pop_asc">Low Popular</string>
+    <string name="pop_dec">Most Popular</string>
+    <string name="vote">High rated</string>
+    <string name="high_rated">High rated</string>
+    <string name="most_popular">Most Popular</string>
+    <string name="low_rated">Low Popular</string>
+    <string name="appbar_scrolling_view_behavior" translatable="false">android.support.design.widget.AppBarLayout$ScrollingViewBehavior</string>
+    <string name="favorite">Favorite</string>
+    <string name="refresh">Refresh</string>
+    <string name="_2015">2015</string>
+    <string name="adults">adults</string>
+    <string name="vote_design">vote</string>
+    <string name="overview">overview</string>
+    <string name="trailers">Trailers :</string>
+    <string name="reviews">Reviews :</string>
+    <string name="title">title</string>
+    <string name="film_name">film name</string>
+    <string name="author">author</string>
+    <string name="content">i am a content</string>
+    <string name="trailer_name">Trailer_name</string>
+    <string name="Favorite">Favorite</string>
+
+
+</resources>
